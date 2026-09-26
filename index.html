@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merry Christmas I miss you</title>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #05060D;
+    }
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+    }
+    #scene {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #05060D;
+    }
+    #lyrics {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(100% - 80px);
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        color: white;
+        z-index: 10;
+        pointer-events: none;
+        transition: color 0.04s linear;
+    }
+    .particle {
+        position: absolute;
+        pointer-events: none;
+        z-index: 2;
+    }
+    .rain {
+        width: 1px;
+        background: #87CEFA;
+        opacity: 0.85;
+    }
+    .snow {
+        border-radius: 50%;
+    }
+    .sparkle {
+        font-size: 12px;
+    }
+    .butterfly {
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+<div id="scene">
+    <div id="lyrics"></div>
+</div>
+<script>
+const scene = document.getElementById("scene");
+const lyricsElement = document.getElementById("lyrics");
+// ---------------- lyrics ----------------
+const lyrics = [
+    ["You know it's true", 0.07, 2.3],
+    ["Yeah i miss you", 0.08, 3.2],
+    ["You know it's true", 0.09, 3.1],
+    ["So, What if i call?", 0.06, 2.7],
+    ["And you pick up the phone", 0.06, 2.9],
+    ["And i use this holiday", 0.06, 1.8],
+    ["To make my way to your ghost", 0.08, 3.4],
+    ["Oh, what if you're lonely?", 0.07, 2.9],
+    ["You know i am too", 0.06, 2.8],
+    ["And i get the chance to say", 0.05, 2.4],
+    ["Merry Christmas i miss you", 0.08, 3.8],
+    ["I MISS YOU", 0.09, 1.4]
+];
+// ---------------- particles ----------------
+const particles = [];
+const colors = {
+    rain: [
+        "#87CEFA",
+        "#4682B4",
+        "#B0C4DE"
+    ],
+    snow: [
+        "#FFF8DC",
+        "#F0FFFF",
+        "#D3D3D3"
+    ],
+    sparkle: [
+        "#304379",
+        "#6D68A1",
+        "#3E6579"
+    ],
+    butterfly: [
+        "#7571B8",
+        "#4F448B",
+        "#FFF8DC"
+    ]
+};
+function random(min, max) {
+    return Math.random() * (max - min) + min;
+}
+function randomInt(min, max) {
+    return Math.floor(random(min, max + 1));
+}
+function choice(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
+function createParticle() {
+    const r = Math.random();
+    let kind;
+    if (r < 0.45) {
+        kind = "rain";
+    }
+    else if (r < 0.70) {
+        kind = "snow";
+    }
+    else if (r < 0.95) {
+        kind = "sparkle";
+    }
+    else {
+        kind = "butterfly";
+    }
+    const el = document.createElement("div");
+    el.classList.add("particle", kind);
+    const particle = {
+        el: el,
+        kind: kind,
+        x: random(0, window.innerWidth),
+        y: random(-window.innerHeight, window.innerHeight),
+        speed: random(0.5, 2),
+        drift: random(-0.4, 0.4),
+        t: random(0, Math.PI * 2),
+        length: randomInt(8, 15),
+        size: randomInt(2, 6)
+    };
+    if (kind === "rain") {
+        el.style.height = particle.length + "px";
+        el.style.background = choice(colors.rain);
+        particle.speed = random(4, 8);
+    }
+    else if (kind === "snow") {
+        el.textContent = "❆";
+        el.style.fontSize =
+            randomInt(2, 6) + "px";
+        el.style.color =
+            choice(colors.snow);
+        particle.speed =
+            random(0.6, 1.6);
+        particle.drift =
+            random(-0.4, 0.4);
+    }
+    else if (kind === "sparkle") {
+        el.textContent = "✦";
+        el.style.fontSize =
+            randomInt(2, 6) + "px";
+        el.style.color =
+            choice(colors.sparkle);
+        particle.speed =
+            random(0.3, 1);
+        particle.drift =
+            random(-0.3, 0.3);
+    }
+    else {
+        el.textContent = "🦋";
+        el.style.fontSize =
+            (randomInt(3, 6) + 4) + "px";
+        el.style.color =
+            choice(colors.butterfly);
+        particle.speed =
+            random(0.5, 1.2);
+    }
+    scene.appendChild(el);
+    particles.push(particle);
+}
+for (let i = 0; i < 150; i++) {
+    createParticle();
+}
+// ---------------- particle animation ----------------
+function animateParticles() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    for (const p of particles) {
+        if (p.kind === "rain") {
+            p.y += p.speed;
+            if (p.y > height) {
+                p.x = random(0, width);
+                p.y = -p.length;
+            }
+        }
+        else if (p.kind === "butterfly") {
+            p.t += 0.08;
+            p.x += Math.sin(p.t) * 1.8;
+            p.y += p.speed * 0.7;
+            if (p.y > height + 20) {
+                p.x = random(0, width);
+                p.y = -20;
+            }
+        }
+        else {
+            p.x += p.drift;
+            p.y += p.speed;
+            if (p.y > height + 20) {
+                p.x = random(0, width);
+                p.y = -10;
+            }
+            if (p.x < -20) {
+                p.x = width + 20;
+            }
+            else if (p.x > width + 20) {
+                p.x = -20;
+            }
+        }
+        p.el.style.transform =
+            `translate(${p.x}px, ${p.y}px)`;
+    }
+    requestAnimationFrame(animateParticles);
+}
+animateParticles();
+// ---------------- twinkle ----------------
+const twinklePalette = [
+    "#7571B8",
+    "#4F448B",
+    "#FFF8DC",
+    "#6D68A1",
+    "#B0C4DE"
+];
+setInterval(() => {
+    for (const p of particles) {
+        if (
+            p.kind === "snow" ||
+            p.kind === "sparkle"
+        ) {
+            p.el.style.color =
+                choice(twinklePalette);
+        }
+    }
+}, 450);
+// ---------------- glow ----------------
+let glowT = 0;
+setInterval(() => {
+    glowT += 0.08;
+    const k =
+        (Math.sin(glowT) + 1) / 2;
+    const bright = [255, 255, 255];
+    const blue = [150, 160, 255];
+    const r =
+        Math.round(
+            bright[0] +
+            (blue[0] - bright[0]) * k
+        );
+    const g =
+        Math.round(
+            bright[1] +
+            (blue[1] - bright[1]) * k
+        );
+    const b =
+        Math.round(
+            bright[2] +
+            (blue[2] - bright[2]) * k
+        );
+    lyricsElement.style.color =
+        `rgb(${r}, ${g}, ${b})`;
+}, 40);
+// ---------------- typewriter ----------------
+let lineIndex = 0;
+let charIndex = 0;
+function typeLine() {
+    if (lineIndex >= lyrics.length) {
+        lineIndex = 0;
+        charIndex = 0;
+        setTimeout(typeLine, 1200);
+        return;
+    }
+    const [
+        line,
+        charDelay,
+        lineDelay
+    ] = lyrics[lineIndex];
+    if (charIndex < line.length) {
+        charIndex++;
+        lyricsElement.textContent =
+            line.substring(0, charIndex);
+        setTimeout(
+            typeLine,
+            charDelay * 1000
+        );
+    }
+    else {
+        setTimeout(() => {
+            lyricsElement.textContent = "";
+            lineIndex++;
+            charIndex = 0;
+            setTimeout(
+                typeLine,
+                250
+            );
+        }, lineDelay * 1000);
+    }
+}
+setTimeout(typeLine, 500);
+</script>
+</body>
+</html>
